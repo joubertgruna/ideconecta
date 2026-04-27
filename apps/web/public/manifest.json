@@ -1,0 +1,39 @@
+{
+  "name": "IDEBRASIL - Classificados Empresariais",
+  "short_name": "IDEBRASIL",
+  "description": "Encontre as melhores empresas do Brasil com busca por inteligência artificial",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "lang": "pt-BR",
+  "orientation": "portrait-primary",
+  "categories": ["business", "shopping"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Buscar Empresas",
+      "url": "/buscar",
+      "description": "Buscar empresas no IDEBRASIL"
+    },
+    {
+      "name": "Anunciar Empresa",
+      "url": "/anunciar",
+      "description": "Cadastrar sua empresa no IDEBRASIL"
+    }
+  ]
+}
