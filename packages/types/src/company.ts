@@ -47,12 +47,19 @@ export interface Company {
   phone?: string;
   whatsapp?: string;
   address?: Address;
+  // Flat city/state fields (Prisma schema stores these at root level)
+  city?: string;
+  state?: string;
   categories: Category[];
   tags: string[];
   status: CompanyStatus;
   plan: ListingPlan;
   rating?: number;
   reviewCount?: number;
+  viewCount: number;
+  clickCount: number;
+  isFeatured: boolean;
+  featuredUntil?: string;
   businessHours?: BusinessHours[];
   socialLinks?: {
     facebook?: string;
@@ -69,10 +76,7 @@ export interface Company {
 }
 
 export interface Listing extends Company {
-  isFeatured: boolean;
-  featuredUntil?: string;
-  viewCount: number;
-  clickCount: number;
+  // viewCount, clickCount, isFeatured, featuredUntil already on Company
 }
 
 export interface CreateCompanyInput {

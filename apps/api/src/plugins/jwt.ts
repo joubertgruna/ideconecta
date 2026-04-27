@@ -9,16 +9,20 @@ export default fp(async (app) => {
     },
   });
 
-  app.addHook('onRequest', async (req) => {
+  // Attach decoded user to request when Authorization header is present.
+  // This does NOT enforce auth on all routes — protected routes use the
+  // protectedProcedure middleware in tRPC which checks ctx.user.
+  app.decorateRequest('user', null);
+  app.addHook('preHandler', async (req) => {
     try {
       const token = req.headers.authorization?.replace('Bearer ', '');
       if (token) {
-        const decoded = app.jwt.verify(token) as {
+        const decoded = app.jwt.verify<{
           id: string;
           email: string;
           role: string;
           name: string;
-        };
+        }>(token);
         (req as typeof req & { user?: typeof decoded }).user = decoded;
       }
     } catch {

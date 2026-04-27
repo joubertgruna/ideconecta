@@ -1,10 +1,16 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import bcrypt from 'bcryptjs';
 import { router, publicProcedure, protectedProcedure } from '../trpc/init.js';
-import * as crypto from 'node:crypto';
 
-function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password + process.env['JWT_SECRET']).digest('hex');
+const BCRYPT_ROUNDS = 12;
+
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, BCRYPT_ROUNDS);
+}
+
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
 }
 
 export const authRouter = router({
@@ -25,7 +31,7 @@ export const authRouter = router({
       const user = await ctx.db.user.create({
         data: {
           email: input.email,
-          passwordHash: hashPassword(input.password),
+          passwordHash: await hashPassword(input.password),
           name: input.name,
           cpf: input.cpf,
           phone: input.phone,
@@ -51,7 +57,7 @@ export const authRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       const user = await ctx.db.user.findUnique({ where: { email: input.email } });
-      if (!user || user.passwordHash !== hashPassword(input.password)) {
+      if (!user || !(await verifyPassword(input.password, user.passwordHash ?? ''))) {
         throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Credenciais inválidas' });
       }
 

@@ -76,7 +76,7 @@ export function Footer() {
 
         <div className="mt-10 border-t border-neutral-800 pt-6 text-center text-sm text-neutral-500">
           <p>© {new Date().getFullYear()} IDEBRASIL. Todos os direitos reservados.</p>
-          <p className="mt-1">CNPJ: 00.000.000/0001-00 · São Paulo, SP · Brasil</p>
+          <p className="mt-1">São Paulo, SP · Brasil</p>
         </div>
       </div>
     </footer>

@@ -81,5 +81,13 @@ export async function buildApp() {
     });
   });
 
+  app.addHook('onClose', async () => {
+    try {
+      await redis.quit();
+    } catch {
+      // ignore disconnect errors during shutdown
+    }
+  });
+
   return app;
 }
