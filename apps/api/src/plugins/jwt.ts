@@ -1,6 +1,10 @@
 import fp from 'fastify-plugin';
 import jwt from '@fastify/jwt';
 
+if (process.env['NODE_ENV'] === 'production' && !process.env['JWT_SECRET']) {
+  throw new Error('JWT_SECRET environment variable must be set in production');
+}
+
 export default fp(async (app) => {
   await app.register(jwt, {
     secret: process.env['JWT_SECRET'] ?? 'dev-secret-change-in-production',
@@ -9,11 +13,13 @@ export default fp(async (app) => {
     },
   });
 
-  // Attach decoded user to request when Authorization header is present.
-  // This does NOT enforce auth on all routes — protected routes use the
-  // protectedProcedure middleware in tRPC which checks ctx.user.
   app.decorateRequest('user', null);
-  app.addHook('preHandler', async (req) => {
+
+  // Runs during onRequest lifecycle — AFTER @fastify/rate-limit (also onRequest,
+  // registered earlier in app.ts) so every request is already rate-limited before
+  // this hook executes. Protected routes still enforce auth via tRPC's
+  // protectedProcedure; this hook only enriches the request context.
+  app.addHook('onRequest', async (req) => {
     try {
       const token = req.headers.authorization?.replace('Bearer ', '');
       if (token) {
@@ -26,7 +32,7 @@ export default fp(async (app) => {
         (req as typeof req & { user?: typeof decoded }).user = decoded;
       }
     } catch {
-      // unauthenticated — not all routes require auth
+      // unauthenticated — not all routes require a token
     }
   });
 });
