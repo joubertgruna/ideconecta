@@ -13,7 +13,9 @@ export default fp(async (app) => {
     },
   });
 
-  app.decorateRequest('user', null);
+  // Fastify v5: object decorations must use a getter so each request gets its
+  // own initial value rather than sharing a single mutable reference.
+  app.decorateRequest('user', { getter: () => null });
 
   // Runs during onRequest lifecycle — AFTER @fastify/rate-limit (also onRequest,
   // registered earlier in app.ts) so every request is already rate-limited before

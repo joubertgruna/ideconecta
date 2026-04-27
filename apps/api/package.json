@@ -14,19 +14,19 @@
     "db:push": "prisma db push"
   },
   "dependencies": {
-    "@fastify/cors": "^9.0.0",
-    "@fastify/helmet": "^11.0.0",
-    "@fastify/jwt": "^8.0.0",
-    "@fastify/rate-limit": "^9.0.0",
+    "@fastify/cors": "^10.0.0",
+    "@fastify/helmet": "^12.0.0",
+    "@fastify/jwt": "^9.0.0",
+    "@fastify/rate-limit": "^10.0.0",
     "@ideconecta/ai-sdk": "*",
     "@ideconecta/types": "*",
     "@prisma/client": "^5.14.0",
     "@trpc/server": "^11.0.0-rc.477",
-    "fastify": "^4.27.0",
+    "fastify": "^5.8.5",
     "ioredis": "^5.3.0",
     "pino": "^9.1.0",
     "zod": "^3.23.0",
-    "fastify-plugin": "^4.5.0",
+    "fastify-plugin": "^5.0.0",
     "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
