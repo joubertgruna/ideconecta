@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -32,6 +32,17 @@ interface EmpresaComCategoria extends Empresa {
   categoria_nome?: string;
 }
 
+interface IBGEEstado {
+  id: number;
+  sigla: string;
+  nome: string;
+}
+
+interface IBGEMunicipio {
+  id: number;
+  nome: string;
+}
+
 const Busca: React.FC = () => {
   const [empresas, setEmpresas] = useState<EmpresaComCategoria[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,6 +54,47 @@ const Busca: React.FC = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([]);
   const [filtrosExpandidos, setFiltrosExpandidos] = useState(false);
+
+  // Estados e Cidades (IBGE)
+  const [estados, setEstados] = useState<IBGEEstado[]>([]);
+  const [cidades, setCidades] = useState<IBGEMunicipio[]>([]);
+  const [cidadesLoading, setCidadesLoading] = useState(false);
+
+  // Debounce ref para auto-search
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [filtros, setFiltros] = useState<EmpresaFilters>({
+    nome: '',
+    categoria: undefined,
+    subcategorias: [],
+    estado: '',
+    cidade: '',
+    ramo_atuacao: '',
+    pagina: 1,
+    limite: 12,
+  });
+
+  // ── Carregar estados do IBGE ───────────────────────────────────────────────
+  useEffect(() => {
+    fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome')
+      .then(r => r.json())
+      .then((data: IBGEEstado[]) => setEstados(data))
+      .catch(() => {});
+  }, []);
+
+  // ── Carregar cidades quando estado muda ───────────────────────────────────
+  useEffect(() => {
+    if (!filtros.estado) {
+      setCidades([]);
+      return;
+    }
+    setCidadesLoading(true);
+    fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${filtros.estado}/municipios?orderBy=nome`)
+      .then(r => r.json())
+      .then((data: IBGEMunicipio[]) => setCidades(data))
+      .catch(() => setCidades([]))
+      .finally(() => setCidadesLoading(false));
+  }, [filtros.estado]);
 
   // Quando ramo muda, recarregar categorias filtradas e limpar categoria/subcategorias
   const handleRamoChange = (ramo: string) => {
@@ -71,17 +123,6 @@ const Busca: React.FC = () => {
     setPaginaAtual(1);
   };
 
-  const [filtros, setFiltros] = useState<EmpresaFilters>({
-    nome: '',
-    categoria: undefined,
-    subcategorias: [],
-    estado: '',
-    cidade: '',
-    ramo_atuacao: '',
-    pagina: 1,
-    limite: 12,
-  });
-
   const carregarCategorias = useCallback(async () => {
     try {
       const response = await empresaService.listarCategorias();
@@ -93,18 +134,15 @@ const Busca: React.FC = () => {
     }
   }, []);
 
-  const buscarEmpresas = useCallback(async () => {
+  const buscarEmpresas = useCallback(async (filtrosParam?: EmpresaFilters, pagina?: number) => {
     setLoading(true);
     setError(null);
-
     try {
       const filtrosBusca = {
-        ...filtros,
-        pagina: paginaAtual,
+        ...(filtrosParam ?? filtros),
+        pagina: pagina ?? paginaAtual,
       };
-
       const response = await empresaService.listarEmpresas(filtrosBusca);
-
       if (response.success) {
         setEmpresas(response.data);
         setTotalEmpresas(response.pagination.total);
@@ -117,22 +155,30 @@ const Busca: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [filtros, paginaAtual]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // ── Inicialização ─────────────────────────────────────────────────────────
   useEffect(() => {
     carregarCategorias();
-    buscarEmpresas();
+    buscarEmpresas(filtros, 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ── Auto-search com debounce ao mudar filtros ─────────────────────────────
   useEffect(() => {
-    buscarEmpresas();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      buscarEmpresas(filtros, paginaAtual);
+    }, 450);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paginaAtual]);
+  }, [filtros, paginaAtual]);
 
   const carregarSubcategorias = useCallback(async () => {
     if (!filtros.categoria) return;
-
     try {
       const response = await empresaService.listarSubcategorias(filtros.categoria);
       if (response.success) {
@@ -153,7 +199,13 @@ const Busca: React.FC = () => {
 
   const handleFiltroChange = (campo: keyof EmpresaFilters, valor: any) => {
     setFiltros(prev => ({ ...prev, [campo]: valor }));
-    setPaginaAtual(1); // Reset para primeira página
+    setPaginaAtual(1);
+  };
+
+  // Ao trocar estado, limpar cidade automaticamente
+  const handleEstadoChange = (sigla: string) => {
+    setFiltros(prev => ({ ...prev, estado: sigla, cidade: '' }));
+    setPaginaAtual(1);
   };
 
   const limparFiltros = () => {
@@ -168,16 +220,6 @@ const Busca: React.FC = () => {
       limite: 12,
     });
     setPaginaAtual(1);
-  };
-
-  const handleBuscaRapida = () => {
-    buscarEmpresas();
-  };
-
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      handleBuscaRapida();
-    }
   };
 
   const filtrosAtivos = Object.entries(filtros).filter(([key, value]) => {
@@ -223,11 +265,10 @@ const Busca: React.FC = () => {
                   placeholder="Nome, serviço ou descrição..."
                   value={filtros.nome}
                   onChange={(e) => handleFiltroChange('nome', e.target.value)}
-                  onKeyPress={handleKeyPress}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Search sx={{ color: '#C23535' }} />
+                        {loading ? <CircularProgress size={16} sx={{ color: '#C23535' }} /> : <Search sx={{ color: '#C23535' }} />}
                       </InputAdornment>
                     ),
                     sx: { borderRadius: 2 },
@@ -272,29 +313,26 @@ const Busca: React.FC = () => {
 
               <Grid item xs={12} md={3}>
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button
-                    variant="contained"
-                    onClick={handleBuscaRapida}
-                    startIcon={<Search />}
-                    fullWidth
-                    sx={{
-                      bgcolor: '#C23535',
-                      '&:hover': { bgcolor: '#A52A2A' },
-                      borderRadius: 2,
-                      fontWeight: 700,
-                      py: 1,
-                    }}
-                  >
-                    Buscar
-                  </Button>
                   {filtrosAtivos.length > 0 && (
                     <Button
                       variant="outlined"
                       onClick={limparFiltros}
                       startIcon={<Clear />}
+                      fullWidth
                       sx={{ borderRadius: 2, borderColor: '#C23535', color: '#C23535', '&:hover': { borderColor: '#A52A2A', bgcolor: '#fff3f3' } }}
                     >
                       Limpar
+                    </Button>
+                  )}
+                  {filtrosAtivos.length === 0 && (
+                    <Button
+                      variant="contained"
+                      startIcon={<Search />}
+                      fullWidth
+                      disabled
+                      sx={{ bgcolor: '#C23535', borderRadius: 2, fontWeight: 700, py: 1 }}
+                    >
+                      Busca automática ativa
                     </Button>
                   )}
                 </Box>
@@ -325,33 +363,64 @@ const Busca: React.FC = () => {
               </Box>
             )}
 
-            {/* Filtros de localização */}
+            {/* Filtros de localização — Estado (Select IBGE) + Cidade (Select IBGE) */}
             <Box
               sx={{
                 mt: 2,
                 display: filtrosExpandidos ? 'flex' : 'none',
                 gap: 2,
                 flexWrap: 'wrap',
-                alignItems: 'center',
+                alignItems: 'flex-start',
               }}
             >
-              <TextField
-                size="small"
-                label="Estado"
-                value={filtros.estado}
-                onChange={(e) => handleFiltroChange('estado', e.target.value.toUpperCase().slice(0, 2))}
-                placeholder="PR"
-                inputProps={{ maxLength: 2 }}
-                sx={{ width: 90, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-              />
-              <TextField
-                size="small"
-                label="Cidade"
-                value={filtros.cidade}
-                onChange={(e) => handleFiltroChange('cidade', e.target.value)}
-                placeholder="Cascavel"
-                sx={{ width: 200, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-              />
+              {/* Select Estado */}
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel>Estado</InputLabel>
+                <Select
+                  value={filtros.estado || ''}
+                  onChange={(e) => handleEstadoChange(e.target.value)}
+                  label="Estado"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value=""><em>Todos</em></MenuItem>
+                  {estados.map((uf) => (
+                    <MenuItem key={uf.sigla} value={uf.sigla}>
+                      {uf.sigla} — {uf.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Select Cidade — habilitado somente após escolher estado */}
+              <FormControl size="small" sx={{ minWidth: 220 }} disabled={!filtros.estado || cidadesLoading}>
+                <InputLabel>
+                  {cidadesLoading ? 'Carregando...' : 'Cidade'}
+                </InputLabel>
+                <Select
+                  value={filtros.cidade || ''}
+                  onChange={(e) => handleFiltroChange('cidade', e.target.value)}
+                  label={cidadesLoading ? 'Carregando...' : 'Cidade'}
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value=""><em>Todas</em></MenuItem>
+                  {cidades.map((cidade) => (
+                    <MenuItem key={cidade.id} value={cidade.nome}>
+                      {cidade.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Indicador de estado selecionado */}
+              {filtros.estado && (
+                <Chip
+                  label={`${filtros.estado}${filtros.cidade ? ` / ${filtros.cidade}` : ''}`}
+                  size="small"
+                  icon={<LocationOn style={{ fontSize: 14 }} />}
+                  onDelete={() => handleEstadoChange('')}
+                  sx={{ bgcolor: '#fff3f3', color: '#C23535', border: '1px solid #C23535', alignSelf: 'center' }}
+                />
+              )}
             </Box>
 
             <Box sx={{ mt: 1 }}>
@@ -377,7 +446,12 @@ const Busca: React.FC = () => {
 
         <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, color: '#2C2C2C' }}>
-            {loading ? 'Buscando...' : (
+            {loading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={18} sx={{ color: '#C23535' }} />
+                <span>Buscando...</span>
+              </Box>
+            ) : (
               <>
                 <Box component="span" sx={{ color: '#C23535' }}>{totalEmpresas}</Box>
                 {` empresa${totalEmpresas !== 1 ? 's' : ''} encontrada${totalEmpresas !== 1 ? 's' : ''}`}
@@ -452,7 +526,7 @@ const Busca: React.FC = () => {
                             fontWeight: 700,
                           }}
                         >
-                          {(empresa.nome_fantasia || empresa.razao_social || 'E')[0].toUpperCase()}
+                          <Business fontSize="small" />
                         </Avatar>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="subtitle1" noWrap fontWeight={700} color="#2C2C2C">

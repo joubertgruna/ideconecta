@@ -6,6 +6,7 @@ export interface User {
   id: number;
   nome: string;
   email: string;
+  logo_url?: string;
   cpf?: string;
   telefone?: string;
   data_nascimento?: string;
@@ -39,7 +40,6 @@ export interface AuthResponse {
 
 export interface EmpresaLoginRequest {
   cpf_cnpj: string;
-  senha: string;
 }
 
 class AuthService {
@@ -104,7 +104,6 @@ class AuthService {
     try {
       const response = await this.api.post('/api/users/login-empresa', {
         cpf_cnpj: credentials.cpf_cnpj,
-        senha: credentials.senha,
       });
 
       const { token, user } = response.data;

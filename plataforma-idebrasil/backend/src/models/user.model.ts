@@ -6,10 +6,14 @@ export interface User {
   email: string;
   senha: string;
   cpf?: string;
+  cnpj?: string;
+  razao_social?: string;
+  nome_fantasia?: string;
   telefone?: string;
   data_nascimento?: Date;
   tipo: 'admin' | 'empresa' | 'usuario';
   ativo: boolean;
+  logo_url?: string | null;
   data_criacao?: Date;
   data_atualizacao?: Date;
 }
@@ -63,10 +67,14 @@ export class UserModel {
     const connection = await getConnection();
     try {
       const clean = cpf.replace(/\D/g, '');
-      // Compara tanto a versão limpa quanto a formatada armazenada no banco
+      // Busca pelo CPF ou pelo CNPJ (remove pontuação para comparar)
+      const stripFn = "REPLACE(REPLACE(REPLACE(REPLACE(?, '.', ''), '-', ''), '/', ''), ' ', '')";
       const [rows] = await connection.execute(
-        "SELECT * FROM usuarios WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), '/', '') = ?" as any,
-        [clean]
+        `SELECT * FROM usuarios WHERE 
+          REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), '/', '') = ? 
+          OR REPLACE(REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', ''), ' ', '') = ?
+        LIMIT 1` as any,
+        [clean, clean]
       );
       return (rows as User[])[0] || null;
     } finally {
@@ -111,6 +119,22 @@ export class UserModel {
       if (user.ativo !== undefined) {
         fields.push('ativo = ?');
         values.push(user.ativo);
+      }
+      if (user.logo_url !== undefined) {
+        fields.push('logo_url = ?');
+        values.push(user.logo_url);
+      }
+      if (user.cnpj !== undefined) {
+        fields.push('cnpj = ?');
+        values.push(user.cnpj);
+      }
+      if (user.razao_social !== undefined) {
+        fields.push('razao_social = ?');
+        values.push(user.razao_social);
+      }
+      if (user.nome_fantasia !== undefined) {
+        fields.push('nome_fantasia = ?');
+        values.push(user.nome_fantasia);
       }
 
       fields.push('data_atualizacao = NOW()');

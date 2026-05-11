@@ -83,10 +83,9 @@ router.post('/register', [
   }
 });
 
-// Login para empresas por CPF ou CNPJ
+// Login para empresas por CPF ou CNPJ (sem senha)
 router.post('/login-empresa', [
-  body('cpf_cnpj').notEmpty().withMessage('CPF ou CNPJ é obrigatório'),
-  body('senha').notEmpty().withMessage('Senha é obrigatória')
+  body('cpf_cnpj').notEmpty().withMessage('CPF ou CNPJ é obrigatório')
 ], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
@@ -94,25 +93,20 @@ router.post('/login-empresa', [
       return res.status(400).json({ success: false, message: 'Dados inválidos', errors: errors.array() });
     }
 
-    const { cpf_cnpj, senha } = req.body;
+    const { cpf_cnpj } = req.body;
     const clean = (cpf_cnpj as string).replace(/\D/g, '');
 
     const user = await UserModel.findByCpf(clean);
     if (!user) {
-      return res.status(401).json({ success: false, message: 'CPF/CNPJ não encontrado' });
+      return res.status(401).json({ success: false, message: 'CPF/CNPJ não encontrado. Verifique seu cadastro.' });
     }
 
     if (user.tipo === 'admin') {
       return res.status(401).json({ success: false, message: 'Use o painel administrativo para login de admin' });
     }
 
-    const validPassword = await bcrypt.compare(senha, user.senha);
-    if (!validPassword) {
-      return res.status(401).json({ success: false, message: 'Senha incorreta' });
-    }
-
     if (!user.ativo) {
-      return res.status(401).json({ success: false, message: 'Conta desativada' });
+      return res.status(401).json({ success: false, message: 'Conta desativada. Entre em contato com o suporte.' });
     }
 
     const token = jwt.sign(
@@ -240,7 +234,7 @@ router.put('/profile', authenticateToken, [
       });
     }
 
-    const { nome, email, telefone, data_nascimento } = req.body;
+    const { nome, email, telefone, data_nascimento, logo_url, cnpj, razao_social, nome_fantasia } = req.body;
     const userId = req.user.id;
 
     // Verificar se email já existe (se está sendo alterado)
@@ -259,6 +253,10 @@ router.put('/profile', authenticateToken, [
     if (email) updateData.email = email;
     if (telefone !== undefined) updateData.telefone = telefone;
     if (data_nascimento) updateData.data_nascimento = new Date(data_nascimento);
+    if (logo_url !== undefined) updateData.logo_url = logo_url;
+    if (cnpj !== undefined) updateData.cnpj = cnpj;
+    if (razao_social !== undefined) updateData.razao_social = razao_social;
+    if (nome_fantasia !== undefined) updateData.nome_fantasia = nome_fantasia;
 
     const updated = await UserModel.update(userId, updateData);
     if (!updated) {

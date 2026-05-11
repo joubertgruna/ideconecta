@@ -101,15 +101,6 @@ const EmpresaDetalhes: React.FC = () => {
     setContactMessage('');
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'verificado': return 'success';
-      case 'rejeitado': return 'error';
-      case 'pendente': return 'warning';
-      default: return 'default';
-    }
-  };
-
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'verificado': return 'Verificada';
@@ -183,7 +174,7 @@ const EmpresaDetalhes: React.FC = () => {
                 color: '#fff',
               }}
             >
-              {(empresa.nome_fantasia || empresa.razao_social || 'E')[0].toUpperCase()}
+              <Business sx={{ fontSize: 36 }} />
             </Avatar>
 
             <Box sx={{ flex: 1 }}>

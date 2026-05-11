@@ -8,8 +8,7 @@ services:
 
   frontend-dev:
     image: node:20-bullseye
-    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
-    command: sh -c "npm start"
+    command: sh -c "npm install --legacy-peer-deps && npm start"
     working_dir: /app
     volumes:
       - ./frontend:/app:delegated
@@ -18,6 +17,8 @@ services:
       - '3005:3000'
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=3005
+      - DANGEROUSLY_DISABLE_HOST_CHECK=true
 
 volumes:
   backend-node-modules:

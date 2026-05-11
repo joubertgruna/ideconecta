@@ -156,8 +156,6 @@ const RegisterForm: React.FC = () => {
           navigate(userType === 'admin' ? '/admin' : userType === 'empresa' ? '/perfil' : '/perfil');
         }, 1500);
       } else {
-        // Disparar erro no contexto para exibir o Alert
-        const { dispatch } = await import('../../contexts/AuthContext').then(() => ({ dispatch: null as any }));
         // Usar o alert local
         formik.setStatus(response.message || 'Erro ao criar conta');
       }
@@ -165,18 +163,21 @@ const RegisterForm: React.FC = () => {
   });
 
   // Atualizar validação quando a aba muda
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
-    formik.setFieldValue('nome', '');
-    formik.setFieldValue('email', '');
-    formik.setFieldValue('senha', '');
-    formik.setFieldValue('confirmarSenha', '');
-    formik.setFieldValue('telefone', '');
-    formik.setFieldValue('cpf', '');
-    formik.setFieldValue('data_nascimento', '');
-    formik.setFieldValue('tipo', getUserType(tabValue));
-    formik.setErrors({});
-    formik.setTouched({});
-  }, [tabValue]);
+    formik.resetForm({
+      values: {
+        nome: '',
+        email: '',
+        senha: '',
+        confirmarSenha: '',
+        telefone: '',
+        cpf: '',
+        data_nascimento: '',
+        tipo: getUserType(tabValue),
+      },
+    });
+  }, [tabValue]); // apenas tabValue — incluir formik causaria loop infinito
 
   return (
     <Box sx={{ maxWidth: 500, mx: 'auto', mt: 4 }}>

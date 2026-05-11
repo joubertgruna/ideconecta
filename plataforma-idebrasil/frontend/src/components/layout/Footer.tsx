@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Container, Grid, Link, Divider, Stack, Chip } from '@mui/material';
-import { Phone, Email, Language, Business } from '@mui/icons-material';
+import { Phone, Email, Language } from '@mui/icons-material';
 
 const Footer: React.FC = () => {
   return (
@@ -20,21 +20,15 @@ const Footer: React.FC = () => {
           <Grid item xs={12} sm={12} md={4}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
               <Box
+                component="img"
+                src="/logo.png"
+                alt="IDECONECTA"
                 sx={{
-                  width: 40,
-                  height: 40,
-                  bgcolor: '#C23535',
-                  borderRadius: 1.5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  height: 36,
+                  objectFit: 'contain',
+                  filter: 'brightness(0) invert(1)',
                 }}
-              >
-                <Business sx={{ color: '#fff', fontSize: 22 }} />
-              </Box>
-              <Typography variant="h6" color="white" fontWeight={700} letterSpacing={0.5}>
-                IDECONECTA
-              </Typography>
+              />
             </Box>
             <Typography variant="body2" sx={{ lineHeight: 1.8, color: 'rgba(255,255,255,0.65)', maxWidth: 280 }}>
               Plataforma de conexões empresariais para fortalecer a comunidade IDEBRASIL com qualidade, credibilidade e foco em crescimento.

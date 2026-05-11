@@ -123,7 +123,7 @@ const Home: React.FC = () => {
                 </Box>
               </Typography>
 
-              <Typography sx={{ fontSize: { xs: '1rem', md: '1.18rem' }, opacity: 0.96, maxWidth: 640, mb: 4 }}>
+              <Typography sx={{ fontSize: { xs: '1rem', md: '1.18rem' }, color: '#ffffff', maxWidth: 640, mb: 4, textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
                 O IDECONECTA conecta empresas, empreendedores e oportunidades com padrão de curadoria,
                 visibilidade qualificada e experiência moderna para geração de parcerias estratégicas.
               </Typography>
@@ -192,7 +192,7 @@ const Home: React.FC = () => {
                 <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, mb: 1.5 }}>
                   Por que o IDECONECTA?
                 </Typography>
-                <Typography sx={{ opacity: 0.95, mb: 2.5 }}>
+                <Typography sx={{ opacity: 1, color: '#ffffff', mb: 2.5 }}>
                   Plataforma criada para fortalecer relações comerciais com qualidade,
                   credibilidade e foco em crescimento sustentável.
                 </Typography>
@@ -283,45 +283,6 @@ const Home: React.FC = () => {
               </Grid>
             ))}
           </Grid>
-
-          <Card
-            sx={{
-              mt: 5,
-              p: { xs: 2.5, md: 3 },
-              borderRadius: 4,
-              background: 'linear-gradient(130deg, #2C2C2C 0%, #464646 50%, #6C1F26 100%)',
-              color: '#fff'
-            }}
-          >
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} md={8}>
-                <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, mb: 1 }}>
-                  Gestão com qualidade e transparência
-                </Typography>
-                <Typography sx={{ opacity: 0.95 }}>
-                  O painel administrativo garante curadoria dos cadastros e eleva a confiança da comunidade.
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  component={Link}
-                  to="/admin"
-                  startIcon={<AdminPanelSettingsIcon />}
-                  sx={{
-                    bgcolor: '#C23535',
-                    color: '#fff',
-                    borderRadius: '999px',
-                    fontWeight: 700,
-                    '&:hover': { bgcolor: '#A52A2A' }
-                  }}
-                >
-                  Acessar administração
-                </Button>
-              </Grid>
-            </Grid>
-          </Card>
         </Container>
       </Box>
 
@@ -335,7 +296,7 @@ const Home: React.FC = () => {
         </Typography>
 
         <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={6}>
             <Card sx={{ height: '100%', textAlign: 'center', p: 3, borderRadius: 4 }}>
               <CardContent>
                 <BusinessIcon sx={{ fontSize: 48, color: '#C23535', mb: 2 }} />
@@ -349,7 +310,7 @@ const Home: React.FC = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={6}>
             <Card sx={{ height: '100%', textAlign: 'center', p: 3, borderRadius: 4 }}>
               <CardContent>
                 <SearchIcon sx={{ fontSize: 48, color: '#C23535', mb: 2 }} />
@@ -358,20 +319,6 @@ const Home: React.FC = () => {
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
                   Descubra empresas por categoria, estado e cidade com busca rápida e prática.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', textAlign: 'center', p: 3, borderRadius: 4 }}>
-              <CardContent>
-                <AdminPanelSettingsIcon sx={{ fontSize: 48, color: '#C23535', mb: 2 }} />
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
-                  Gestão administrativa
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Aprovação de empresas e manutenção de qualidade para fortalecer a confiança da rede.
                 </Typography>
               </CardContent>
             </Card>

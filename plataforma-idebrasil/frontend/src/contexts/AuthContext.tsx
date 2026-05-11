@@ -10,6 +10,7 @@ export interface User {
   nome?: string;
   username?: string;
   telefone?: string;
+  logo_url?: string;
   // Campos específicos para empresa
   cpf?: string;
   cnpj?: string;

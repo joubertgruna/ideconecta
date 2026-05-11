@@ -150,7 +150,9 @@ const EmpresaCadastro: React.FC = () => {
         ...prev,
         cpfValid: response.valido,
         cpfValidating: false,
-        cpfMensagem: response.mensagem || '',
+        cpfMensagem: response.valido
+          ? 'CPF validado com sucesso'
+          : 'CPF não encontrado na base IDEBRASIL',
       }));
 
       // If found in IDEBRASIL base, prefill name only (don't auto-advance)
@@ -365,6 +367,34 @@ const EmpresaCadastro: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
+                label="CPF"
+                value={formData.cpf}
+                onChange={(e) => handleInputChange('cpf', e.target.value)}
+                placeholder="000.000.000-00"
+                required
+                error={validation.cpfValid === false}
+                helperText={
+                  validation.cpfValidating
+                    ? 'Validando CPF na base IDEBRASIL...'
+                    : validation.cpfMensagem || (
+                        validation.cpfValid === null ? 'Digite o CPF para validação' : ''
+                      )
+                }
+                InputProps={{
+                  endAdornment: validation.cpfValidating ? (
+                    <CircularProgress size={20} />
+                  ) : validation.cpfValid ? (
+                    <CheckCircle color="success" />
+                  ) : validation.cpfValid === false ? (
+                    <Error color="error" />
+                  ) : null,
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
                 label="Nome Completo"
                 value={formData.nome}
                 onChange={(e) => handleInputChange('nome', e.target.value)}
@@ -391,34 +421,6 @@ const EmpresaCadastro: React.FC = () => {
                 onChange={(e) => handleInputChange('celular', e.target.value)}
                 placeholder="(45) 99999-9999"
                 required
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="CPF"
-                value={formData.cpf}
-                onChange={(e) => handleInputChange('cpf', e.target.value)}
-                placeholder="000.000.000-00"
-                required
-                error={validation.cpfValid === false}
-                helperText={
-                  validation.cpfValidating
-                    ? 'Validando CPF na base IDEBRASIL...'
-                    : validation.cpfMensagem || (
-                        validation.cpfValid === null ? 'Digite o CPF para validação' : ''
-                      )
-                }
-                InputProps={{
-                  endAdornment: validation.cpfValidating ? (
-                    <CircularProgress size={20} />
-                  ) : validation.cpfValid ? (
-                    <CheckCircle color="success" />
-                  ) : validation.cpfValid === false ? (
-                    <Error color="error" />
-                  ) : null,
-                }}
               />
             </Grid>
           </Grid>
@@ -464,18 +466,30 @@ const EmpresaCadastro: React.FC = () => {
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
-                label="Endereço Completo"
+                label="CEP"
+                value={formData.cep}
+                onChange={(e) => handleInputChange('cep', e.target.value)}
+                onBlur={consultarCEP}
+                placeholder="00000-000"
+                helperText="Preencha o CEP para autocompletar o endereço"
+              />
+            </Grid>
+
+            <Grid item xs={12} md={9}>
+              <TextField
+                fullWidth
+                label="Endereço"
                 value={formData.endereco}
                 onChange={(e) => handleInputChange('endereco', e.target.value)}
-                placeholder="Rua, número, bairro, cidade - UF, CEP"
+                placeholder="Rua / Av. / Logradouro"
                 required
               />
             </Grid>
 
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 label="Bairro"
@@ -484,7 +498,7 @@ const EmpresaCadastro: React.FC = () => {
               />
             </Grid>
 
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={5}>
               <TextField
                 fullWidth
                 label="Cidade"
@@ -500,17 +514,6 @@ const EmpresaCadastro: React.FC = () => {
                 value={formData.estado}
                 onChange={(e) => handleInputChange('estado', e.target.value)}
                 placeholder="SP"
-              />
-            </Grid>
-
-            <Grid item xs={12} md={3}>
-              <TextField
-                fullWidth
-                label="CEP"
-                value={formData.cep}
-                onChange={(e) => handleInputChange('cep', e.target.value)}
-                onBlur={consultarCEP}
-                placeholder="00000-000"
               />
             </Grid>
 
@@ -763,7 +766,7 @@ const EmpresaCadastro: React.FC = () => {
               <CheckCircle sx={{ fontSize: 48, color: '#2e7d32' }} />
             </Box>
             <Typography variant="h4" gutterBottom fontWeight={700} color="#2e7d32">
-              Cadastro Realizado!
+              Cadastro Realizado com Sucesso!
             </Typography>
             <Typography variant="body1" color="text.secondary" paragraph>
               {success}
@@ -797,7 +800,7 @@ const EmpresaCadastro: React.FC = () => {
             component="h1"
             sx={{ fontSize: { xs: '1.8rem', md: '2.4rem' }, fontWeight: 700, color: '#fff', mb: 1 }}
           >
-            Cadastrar Empresa
+            Cadastrar Empresa - IDEBRASIL
           </Typography>
           <Typography sx={{ opacity: 0.9, fontSize: '1.05rem' }}>
             Preencha os dados para ingressar na rede de empresas IDEBRASIL
@@ -817,17 +820,23 @@ const EmpresaCadastro: React.FC = () => {
         >
           <Box
             sx={{
-              px: { xs: 2, md: 4 },
-              pt: { xs: 3, md: 4 },
+              px: { xs: 1, sm: 2, md: 4 },
+              pt: { xs: 2.5, md: 4 },
               pb: 2,
               borderBottom: '1px solid rgba(194,53,53,0.1)',
             }}
           >
             <Stepper
               activeStep={activeStep}
+              alternativeLabel
               sx={{
                 '& .MuiStepIcon-root.Mui-active': { color: '#C23535' },
                 '& .MuiStepIcon-root.Mui-completed': { color: '#C23535' },
+                '& .MuiStepLabel-label': {
+                  fontSize: { xs: '0.65rem', sm: '0.8rem', md: '0.875rem' },
+                  mt: { xs: 0.3, md: 0.5 },
+                  lineHeight: 1.2,
+                },
               }}
             >
               {steps.map((label) => (

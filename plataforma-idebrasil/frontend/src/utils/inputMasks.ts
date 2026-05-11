@@ -7,6 +7,8 @@ export const normalizeText = (value: string = ''): string =>
   value.replace(/\s+/g, ' ').trimStart();
 
 export const normalizeName = (value: string = ''): string => {
+  const preservedUppercaseWords = new Set(['idebrasil', 'mei', 'ltda', 'sa']);
+
   const clean = value
     .replace(/[^A-Za-zÀ-ÿ\s'-]/g, '')
     .replace(/\s+/g, ' ')
@@ -16,6 +18,9 @@ export const normalizeName = (value: string = ''): string => {
     .split(' ')
     .map((word) => {
       if (!word) return '';
+      if (preservedUppercaseWords.has(word.toLowerCase())) {
+        return word.toUpperCase();
+      }
       return `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`;
     })
     .join(' ');

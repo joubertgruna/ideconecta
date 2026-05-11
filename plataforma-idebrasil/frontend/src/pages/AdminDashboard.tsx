@@ -49,12 +49,9 @@ import {
   BarChart,
   People,
   MonitorHeart,
-  PersonOff,
   PersonAdd,
   DeleteForever,
-  TrendingUp,
   Store,
-  HowToReg,
   AccessTime,
   Edit,
   CreditCard,
@@ -83,6 +80,7 @@ interface AdminUsuario {
   email: string;
   cpf: string | null;
   telefone: string | null;
+  logo_url?: string | null;
   tipo: 'admin' | 'empresa' | 'usuario';
   ativo: number;
   data_criacao: string;
@@ -836,8 +834,10 @@ const AdminDashboard: React.FC = () => {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Avatar sx={{ width: 28, height: 28, fontSize: 12,
-                          bgcolor: usuario.tipo === 'admin' ? '#C23535' : usuario.tipo === 'empresa' ? '#1565c0' : '#555' }}>
-                          {usuario.nome?.charAt(0).toUpperCase()}
+                          bgcolor: usuario.tipo === 'admin' ? '#C23535' : usuario.tipo === 'empresa' ? '#1565c0' : '#555' }}
+                          src={usuario.tipo === 'empresa' ? usuario.logo_url || undefined : undefined}
+                        >
+                          {usuario.tipo === 'empresa' ? <Business fontSize="small" /> : usuario.nome?.charAt(0).toUpperCase()}
                         </Avatar>
                         <Typography variant="body2">{usuario.nome}</Typography>
                       </Box>

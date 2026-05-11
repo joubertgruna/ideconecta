@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Card,
@@ -8,16 +8,9 @@ import {
   Typography,
   Alert,
   InputAdornment,
-  IconButton,
   Divider,
 } from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  Lock,
-  Business,
-  Badge,
-} from '@mui/icons-material';
+import { Business, Badge } from '@mui/icons-material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
@@ -26,7 +19,6 @@ import { useAuth } from '../../contexts/AuthContext';
 const EmpresaLoginForm: React.FC = () => {
   const { state, login, clearError } = useAuth();
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
 
   React.useEffect(() => {
     if (state.isAuthenticated && state.user) {
@@ -39,10 +31,7 @@ const EmpresaLoginForm: React.FC = () => {
   }, [state.isAuthenticated, state.user, navigate]);
 
   const formik = useFormik({
-    initialValues: {
-      cpf_cnpj: '',
-      senha: '',
-    },
+    initialValues: { cpf_cnpj: '' },
     validationSchema: Yup.object({
       cpf_cnpj: Yup.string()
         .required('CPF ou CNPJ é obrigatório')
@@ -51,12 +40,9 @@ const EmpresaLoginForm: React.FC = () => {
           const clean = value.replace(/\D/g, '');
           return clean.length === 11 || clean.length === 14;
         }),
-      senha: Yup.string()
-        .min(6, 'Mínimo 6 caracteres')
-        .required('Senha é obrigatória'),
     }),
     onSubmit: async (values) => {
-      await login({ cpf_cnpj: values.cpf_cnpj, senha: values.senha }, 'empresa');
+      await login({ cpf_cnpj: values.cpf_cnpj }, 'empresa');
     },
   });
 
@@ -64,7 +50,6 @@ const EmpresaLoginForm: React.FC = () => {
     <Box sx={{ maxWidth: 420, mx: 'auto', mt: 6 }}>
       <Card elevation={3}>
         <CardContent sx={{ p: 4 }}>
-          {/* Header */}
           <Box sx={{ textAlign: 'center', mb: 3 }}>
             <Box
               sx={{
@@ -85,7 +70,7 @@ const EmpresaLoginForm: React.FC = () => {
               Área da Empresa
             </Typography>
             <Typography variant="body2" color="text.secondary" mt={0.5}>
-              Entre com seu CPF ou CNPJ para acessar
+              Digite seu CPF ou CNPJ para acessar
             </Typography>
           </Box>
 
@@ -110,38 +95,11 @@ const EmpresaLoginForm: React.FC = () => {
               error={formik.touched.cpf_cnpj && Boolean(formik.errors.cpf_cnpj)}
               helperText={formik.touched.cpf_cnpj && formik.errors.cpf_cnpj}
               margin="normal"
+              autoFocus
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <Badge sx={{ color: '#888' }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <TextField
-              fullWidth
-              id="senha"
-              name="senha"
-              label="Senha"
-              type={showPassword ? 'text' : 'password'}
-              value={formik.values.senha}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.senha && Boolean(formik.errors.senha)}
-              helperText={formik.touched.senha && formik.errors.senha}
-              margin="normal"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock sx={{ color: '#888' }} />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(v => !v)} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
                   </InputAdornment>
                 ),
               }}
@@ -162,7 +120,7 @@ const EmpresaLoginForm: React.FC = () => {
                 py: 1.5,
               }}
             >
-              {state.loading ? 'Entrando...' : 'Entrar'}
+              {state.loading ? 'Entrando...' : 'Acessar Painel'}
             </Button>
 
             <Box sx={{ textAlign: 'center', mb: 1 }}>
