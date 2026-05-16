@@ -139,6 +139,27 @@ INSERT INTO empresas (nome, email, celular, cpf, razao_social, nome_fantasia, cn
 ('Farmácia Vida Saudável', 'atendimento@vidasaudavel.farm.br', '(85) 99999-0011', '111.222.333-11', 'Vida Saudável Farmácia LTDA', 'Vida Saudável', '11.122.233/0001-11', 'Av. Bezerra de Menezes, 600', '600', 'São Gerardo', 'Fortaleza', 'CE', '60325-000', '(85) 3388-0011', 'atendimento@vidasaudavel.farm.br', NULL, 'Farmácia completa com medicamentos, cosméticos, perfumaria e manipulação.', 'comercio', 5, 'verificado'),
 ('Advocacia Silva & Associados', 'contato@silvaadvocacia.adv.br', '(71) 99999-0012', '121.212.121-12', 'Silva & Associados Advocacia SS', 'Silva Advocacia', '12.121.212/0001-12', 'Av. Tancredo Neves, 800', '800', 'Caminho das Árvores', 'Salvador', 'BA', '41820-021', '(71) 3300-0012', 'contato@silvaadvocacia.adv.br', 'https://silvaadvocacia.adv.br', 'Escritório de advocacia com atuação em direito empresarial, trabalhista e cível.', 'prestacao_servico', 27, 'verificado');
 
+-- Tabela de alunos (para importação e gerenciamento)
+CREATE TABLE IF NOT EXISTS alunos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(255) NOT NULL,
+    cpf VARCHAR(14) NOT NULL UNIQUE,
+    email VARCHAR(255),
+    telefone VARCHAR(20),
+    curso VARCHAR(100),
+    turma VARCHAR(50),
+    status_aluno ENUM('ativo', 'inativo', 'concluído') DEFAULT 'ativo',
+    importado_por VARCHAR(100) DEFAULT 'admin',
+    data_importacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    importado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_alunos_cpf (cpf),
+    INDEX idx_alunos_status (status_aluno),
+    INDEX idx_alunos_data_importacao (data_importacao),
+    INDEX idx_alunos_curso (curso)
+);
+
 -- Logs de auditoria (futuramente)
 CREATE TABLE IF NOT EXISTS audit_logs (
     id INT PRIMARY KEY AUTO_INCREMENT,
