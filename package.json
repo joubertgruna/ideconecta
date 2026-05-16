@@ -1,26 +1,92 @@
 {
-  "name": "simei-contador",
+  "name": "idebrasil-frontend",
   "version": "1.0.0",
-  "private": true,
-  "description": "Sistema de contabilidade para empresas no Simples Nacional",
-  "workspaces": [
-    "apps/*"
-  ],
+  "description": "Frontend da plataforma IDEBRASIL - Classificados Empresariais",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "docker-compose up",
-    "dev:web": "npm run dev -w web",
-    "dev:api": "npm run dev -w api",
-    "build": "npm run build -w web",
-    "test": "npm run test --workspaces --if-present",
-    "db:migrate": "npm run db:migrate -w api",
-    "db:seed": "npm run db:seed -w api",
-    "docker:up": "docker-compose up --build",
-    "docker:down": "docker-compose down",
-    "lint": "npm run lint --workspaces --if-present"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "eject": "react-scripts eject",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" || true",
+    "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix || true"
   },
-  "engines": {
-    "node": ">=18.0.0"
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.19",
+    "@mui/lab": "^5.0.0-alpha.155",
+    "@mui/material": "^5.14.19",
+    "axios": "^1.6.2",
+    "clsx": "^2.0.0",
+    "formik": "^2.4.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
+    "react-helmet-async": "^2.0.1",
+    "react-hot-toast": "^2.4.1",
+    "react-input-mask": "^2.0.4",
+    "react-router-dom": "^6.20.1",
+    "react-scripts": "^5.0.1",
+    "styled-components": "^6.1.6",
+    "yup": "^1.3.2"
   },
-  "author": "SIMEI Contador",
-  "license": "MIT"
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.68",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@types/react-router-dom": "^5.3.3",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "eslint": "^8.55.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^27.5.1",
+    "jest-environment-jsdom": "^27.5.1",
+    "typescript": "^4.9.5",
+    "webpack-dev-server": "^5.2.3"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:3001",
+  "jest": {
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/index.tsx",
+      "!src/reportWebVitals.ts",
+      "!src/setupTests.ts"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
+      }
+    }
+  }
 }
